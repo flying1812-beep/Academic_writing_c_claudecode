@@ -1,4 +1,4 @@
-# Quality Control Guide (v0.4.0)
+# Quality Control Guide (v0.5.0)
 
 ## Overview
 논문 제출 전 **최소 3라운드**의 QC를 수행해야 합니다. 각 라운드는 서로 다른 측면에 집중하며, 모든 검증 결과는 `review/qc_log.md`에 기록합니다.
@@ -245,6 +245,33 @@ Citation  First Appears In    Position    Number Correct?
 - [ ] 최근 5년 이내 문헌이 전체의 50% 이상인가?
 - [ ] 해당 분야의 최신 주요 논문이 누락되지 않았는가?
 - [ ] 고전적 reference (>10년)는 꼭 필요한 것만 포함했는가?
+
+### 2.9 Claim Audit (LA-9, 주장-근거 대조)
+
+> 인용 **형식**이 아니라 인용된 **내용**이 주장을 실제로 뒷받침하는지 검증
+> 상세 절차: `docs/literature_analysis_guide.md` LA-9 / 명령어: `/lit-audit [section]`
+
+**절차:**
+
+1. Introduction·Discussion의 실질적 주장(claim)을 문장 단위로 추출
+2. 각 주장을 corpus(`knowledge/evidence.md` + PDF)와 대조하여 라벨 부여
+3. 결과를 `knowledge/analysis/09_claim_audit_[section].md`에 기록
+
+| 라벨 | 조치 |
+|------|------|
+| Strongly Supported | 인용 번호 확인 후 유지 |
+| Partially Supported | 주장 범위 축소 + hedging 적용 (writing_guide.md) |
+| Contradicted | 삭제하거나 반대 근거를 함께 제시 |
+| Not Found in Corpus | 삭제, 또는 Phase 1으로 돌아가 근거 확보 후 재작성 |
+
+**과잉 주장 스캔 (9-B):**
+
+- [ ] 근거보다 넓은 일반화(overgeneralization)가 없는가?
+- [ ] 연관성(association)을 인과(causation)로 서술한 곳이 없는가?
+- [ ] corpus 내 반대 근거를 언급 없이 지나친 곳이 없는가?
+- [ ] "no prior study exists" 류 문장이 실제 검색 기록(Search Log) 없이 쓰이지 않았는가?
+
+**Gate:** `Contradicted` 또는 `Not Found in Corpus` 항목이 남아 있으면 Round 2를 PASS로 기록하지 않는다.
 
 ---
 
@@ -634,6 +661,7 @@ Q6: Missing data가 결과에 영향을 줄 수 있는가?
 |---------|--------|
 | `Run QC Round 1` | Number consistency check |
 | `Run QC Round 2` | Reference verification |
+| `/lit-audit [section]` | Claim audit (Round 2.9, LA-9) |
 | `Run QC Round 3` | Logic and flow check |
 | `Run QC Round 4` | Terminology, abbreviation & tense check |
 | `Run QC Round 5` | Statistical quality check |

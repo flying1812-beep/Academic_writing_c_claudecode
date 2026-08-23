@@ -1,4 +1,4 @@
-# Academic Paper Writing Project (v0.6.0)
+# Academic Paper Writing Project (v0.7.0)
 
 ## Research Configuration
 **Topic:** [INSERT YOUR SPECIFIC RESEARCH TOPIC]
@@ -24,13 +24,18 @@ project/
 │   ├── evidence_guide.md         # Evidence 작성 가이드
 │   ├── revision_guide.md        # Revision & reviewer response guide
 │   ├── figure_guide.md          # Figure generation guide
-│   └── docx_guide.md            # DOCX 변환 가이드 (서식, 테이블, 네이밍)
+│   ├── docx_guide.md            # DOCX 변환 가이드 (서식, 테이블, 네이밍)
+│   └── literature_analysis_guide.md  # 문헌 분석 10 레시피 (Phase 1.5)
 ├── knowledge/                    # Reference materials
 │   ├── evidence.md               # 참고문헌 요약 정리 자료집
 │   ├── pdf/                      # Original PDF files
 │   │   └── author_year_keyword.pdf
-│   └── summaries/                # MD summaries of key papers
-│       └── author_year_keyword.md
+│   ├── summaries/                # MD summaries of key papers
+│   │   └── author_year_keyword.md
+│   └── analysis/                 # Phase 1.5 문헌 분석 산출물
+│       ├── 01_lit_map.md
+│       ├── 02_research_gaps.md
+│       └── 08_evidence_matrix.md
 ├── data/                         # Statistical analysis
 │   ├── raw_data.csv              # Original dataset (CSV/XLSX)
 │   ├── analysis_plan.md          # Analysis plan (required before analysis)
@@ -69,7 +74,10 @@ project/
 ├── knowledge/                    # 공유 참고문헌 (모든 논문 공통)
 │   ├── evidence.md
 │   ├── pdf/
-│   └── summaries/
+│   ├── summaries/
+│   └── analysis/                 # 논문별 분석 산출물
+│       ├── paper1_xxx/
+│       └── paper2_yyy/
 ├── scripts/                      # 공유 스크립트
 ├── data/
 │   ├── raw_data.csv              # 원본 데이터 (공유)
@@ -172,9 +180,11 @@ output/paper1_xxx/revision/REV1/
 | `docs/revision_guide.md` | Reviewer response guide (응답서 작성, 외교적 표현) | Revision (리뷰어 코멘트 수신 후) |
 | `docs/figure_guide.md` | Figure generation guide (DPI, 팔레트, Python 템플릿) | Phase 2 (figure 생성 시) |
 | `docs/docx_guide.md` | DOCX 변환 가이드 (서식, 테이블 스타일, 네이밍 규칙) | Phase 7 (DOCX 변환 시 **반드시** 읽고 따를 것) |
+| `docs/literature_analysis_guide.md` | 문헌 분석 10 레시피 (map / gap / debate / synthesis / matrix / audit) | Phase 1.5 (evidence 등록 후, draft plan 전) |
 | `knowledge/evidence.md` | 참고문헌 요약 정리 자료집 (논문별 요약·핵심·서지정보) | Phase 1 (setup) + 인용 시 참조 |
 | `knowledge/pdf/` | Original reference PDFs | When verifying claims |
 | `knowledge/summaries/` | 개별 논문 full-text 상세 요약 | 핵심 논문 상세 확인 시 |
+| `knowledge/analysis/` | 문헌 분석 산출물 (lit map, gaps, debates, evidence matrix 등) | Phase 1.5 + draft plan·QC 작성 시 참조 |
 | `data/` | Raw data (CSV/XLSX) | Phase 2 (statistical analysis) |
 | `data/analysis_plan.md` | 분석 계획 (필수 작성·승인 후 분석 진행) | Phase 2 (before running analysis) |
 | `data/py/` | Python analysis scripts | Phase 2 (statistical analysis) |
@@ -355,13 +365,15 @@ These must match across **Abstract ↔ Methods ↔ Results ↔ Tables**:
    - 예: "conservative & evidence-based", "novel technique 강조", "기존 방법과 동등성 주장"
    - 전체 원고에서 일관되게 유지할 톤 명시
 3. **Essential references** — 반드시 인용해야 할 핵심 참고문헌 목록
-   - evidence.md에서 선별하거나, 추가 검색이 필요한 주제 명시
+   - evidence.md·`knowledge/analysis/08_evidence_matrix.md`에서 선별하거나, 추가 검색이 필요한 주제 명시
    - 각 reference의 인용 목적 기재 (배경, 방법론 근거, 비교 대상 등)
 4. **Evidence gap** — 추가로 필요한 근거 자료 (아직 evidence.md에 없는 것)
    - 검색 키워드 또는 필요한 논문 유형 명시
 5. **Table/Figure plan** — 몇 개, 각각 어떤 내용, Table vs Figure 결정
 6. **Introduction outline** — Background → Gap → Purpose 흐름
+   - Gap은 `knowledge/analysis/02_research_gaps.md`의 상위 갭에서 가져오고 provenance 태그를 유지
 7. **Discussion outline** — 주요 논점 3-5개, 비교할 선행연구 목록
+   - `knowledge/analysis/03_debates.md`·`06_contradictions.md`를 근거로 구성
 8. **Limitation points** — 예상 한계점 및 대응 논리
 9. **Target word count** — 저널 기준에 맞춘 섹션별 목표 분량 (선택)
 
@@ -374,6 +386,7 @@ These must match across **Abstract ↔ Methods ↔ Results ↔ Tables**:
 | Phase                    | 권장 모델           | 대안 모델         | 이유                                       |
 |--------------------------|---------------------|-------------------|--------------------------------------------|
 | Phase 1: Setup           | Opus/Sonnet         | —                 | 검색·정리 작업                             |
+| **Phase 1.5: Lit Analysis** | **Opus (권장)**  | Sonnet (가능)     | gap·모순 판별은 근거 해석 능력이 필요      |
 | **Phase 2: Analysis**    | **Opus (권장)**     | Sonnet (가능)     | analysis_plan 작성은 Opus 권장             |
 | **Phase 3: Draft Plan**  | **Opus (권장)**     | —                 | 논문의 방향·논조·구성을 결정하는 핵심 단계 |
 | Phase 4: Draft           | Sonnet (기본)       | Opus (가능하면)   | draft_plan + evidence 기반 작성            |
@@ -384,13 +397,30 @@ These must match across **Abstract ↔ Methods ↔ Results ↔ Tables**:
 
 **사용자 안내 (모델 선택 가이드):**
 
-- **Opus 권장 단계:** Phase 2 (Analysis Plan), Phase 3 (Draft Plan), Phase 8 (Revision)
+- **Opus 권장 단계:** Phase 1.5 (Literature Analysis), Phase 2 (Analysis Plan), Phase 3 (Draft Plan), Phase 8 (Revision)
   - 전략적 판단·설계가 필요한 단계 → Opus로 방향을 잡아야 이후 작업 품질이 보장됨
   - Draft Plan 작성 시 Plan Mode(`/plan`) 활용을 권장하여 사용자와 충분한 논의 후 확정
 - **Sonnet 기본, Opus 가능하면 사용:** Phase 4-6 (Draft, Polish, QC)
   - draft_plan.md + evidence.md가 잘 갖춰져 있으면 Sonnet으로도 충분
   - 비용 여유가 있으면 Opus 사용이 더 좋은 결과를 냄
 - **핵심 원칙:** Plan은 Opus로 잘 잡고 → 작성은 Sonnet으로도 OK
+
+### 10. Literature Analysis Integrity (문헌 분석 무결성)
+
+> **상세 가이드: `docs/literature_analysis_guide.md`**
+> evidence 등록(Phase 1)과 draft plan(Phase 3) 사이에 문헌을 구조화하는 Phase 1.5 규칙
+
+**규칙:**
+
+- **Closed-corpus rule** — 분석은 정의된 corpus(evidence.md 등록분 + PDF) 안에서만 수행한다. 모델의 사전 지식으로 claim을 보충하지 않는다
+- **모든 claim에 출처 태그** — `[N]` 또는 `[N, p.12]` / `[N, Discussion]` 형태로 위치까지 명시
+- **"없음"의 범위를 구분** — `Not found in corpus`(이 corpus에 없음)와 `Searched, none found`(실제 검색 후 없음)는 다른 진술이다. 원고에 "no prior study exists"를 쓰려면 실제 검색을 수행하고 Search Log에 기록한 뒤 승격시킨다
+- **출처 유형 표기** — `REPORTED`(저자 서술) / `SYNTHESIZED`(논문 간 종합) / `INFERRED`(추론)를 구분한다. INFERRED는 단정형 금지
+- **이질성 ≠ 모순** — population·outcome 정의·설계가 다른 연구는 모순이 아니다. 방향이 같고 크기만 다른 결과도 모순이 아니다
+- **산출물은 재료** — `knowledge/analysis/`의 결과를 원고에 그대로 복사하지 않는다. Phase 4에서 writing_guide.md 규칙으로 다시 쓴다
+- **차기 연구 질문 게이트** — LA-10에서 도출한 질문을 `analysis_plan.md`로 넘기기 전, 확장 문헌 검색과 사용자 확인을 거친다
+
+**최소 세트:** 시간이 부족해도 LA-1(map) → LA-2(gaps) → LA-8(matrix) → LA-9(claim audit)는 수행한다.
 
 ---
 
@@ -427,6 +457,20 @@ Phase 1: Setup
 ├── Summarize & register in knowledge/evidence.md (docs/evidence_guide.md 참조)
 ├── 핵심 논문은 knowledge/summaries/에 상세 요약
 └── Read docs/writing_guide.md for target sections
+
+Phase 1.5: Literature Analysis (문헌 구조화) — Opus 권장
+├── Read docs/literature_analysis_guide.md
+├── Corpus 확정 (evidence 번호 범위·논문 수·제외 논문 기록)
+├── LA-1  Literature map        → knowledge/analysis/01_lit_map.md
+├── LA-2  Research gaps         → knowledge/analysis/02_research_gaps.md
+├── LA-3  Academic debates      → knowledge/analysis/03_debates.md
+├── LA-4  Evidence synthesis    → knowledge/analysis/04_synthesis_[topic].md
+├── LA-5  Methods comparison    → knowledge/analysis/05_methods_comparison.md
+├── LA-6  Contradictions        → knowledge/analysis/06_contradictions.md
+├── LA-7  Theory/framework map  → knowledge/analysis/07_theory_map.md
+├── LA-8  Evidence matrix       → knowledge/analysis/08_evidence_matrix.md
+├── (LA-9는 Phase 4 이후, LA-10은 마무리 단계에 수행)
+└── 최소 세트: LA-1 → LA-2 → LA-8
 
 Phase 2: Statistical Analysis — Opus 권장 (analysis_plan)
 ├── Read docs/statistical_analysis_guide.md (분석 설계 원칙·검정 선택·보정)
@@ -485,6 +529,7 @@ Phase 5: Style Polish
 Phase 6: QC (3 rounds CRITICAL, 6 rounds RECOMMENDED)
 ├── Round 1: Number consistency — Claude 자동 + 사용자 확인 (qc_guide.md)
 ├── Round 2: Reference verification — Claude + 사용자 (evidence.md 대조)
+│   └── LA-9 Claim audit 수행 (literature_analysis_guide.md) → knowledge/analysis/09_claim_audit_*.md
 ├── Round 3: Logic & flow check — Dr. Editor (section 간 흐름)
 ├── Round 4: Terminology/abbreviation/tense — Dr. Editor (권장)
 ├── Round 5: Statistical quality — Dr. Statistician (권장)
@@ -520,9 +565,10 @@ Phase 8: Revision (리뷰어 코멘트 수신 후)
 
 | Phase | Move to Next When |
 |-------|-------------------|
-| 1 → 2 | knowledge/evidence.md has ≥10 verified refs, topic defined, data ready |
+| 1 → 1.5 | knowledge/evidence.md has ≥10 verified refs, topic defined |
+| 1.5 → 2 | Corpus 확정 기록 + 최소 세트(LA-1, LA-2, LA-8) 완료, 모든 claim에 출처 태그, data ready |
 | 2 → 3 | analysis_plan.md created & approved, all analyses complete, tables generated |
-| 3 → 4 | draft_plan.md created & approved — 9개 필수 항목 완결 (key message, tone/voice, essential refs, evidence gap, table/figure plan, intro/discussion outline, limitation points, target word count) — Rule 8 참조 |
+| 3 → 4 | knowledge/analysis/ 산출물이 draft_plan에 반영됨 + draft_plan.md created & approved — 9개 필수 항목 완결 (key message, tone/voice, essential refs, evidence gap, table/figure plan, intro/discussion outline, limitation points, target word count) — Rule 8 참조 |
 | 4 → 5 | All sections drafted, numbers match tables |
 | 5 → 6 | Writing style rules applied, Dr. Editor reviewed |
 | 6 → 7 | Minimum 3 QC rounds passed (6 recommended), checklist complete |
@@ -542,6 +588,16 @@ Phase 8: Revision (리뷰어 코멘트 수신 후)
 | `/search-evidence [query]` | PubMed 검색 → 선택 → evidence.md 등록 (slash command) |
 | `/import-doi [doi]` | DOI로 논문 가져와서 evidence.md 등록 (slash command) |
 | `Read writing guide for [section]` | Load section-specific guidance |
+
+### Literature Analysis (Phase 1.5)
+| Command | Action |
+|---------|--------|
+| `/lit-analyze [mode]` | 문헌 분석 실행 (map / gaps / debates / synthesis / methods / contradictions / theory / matrix) |
+| `/lit-audit [file or section]` | 초안 주장을 corpus에 대조 (LA-9) |
+| `/lit-questions [topic]` | 문헌 기반 차기 연구 질문 10개 도출·순위화 (LA-10) |
+| `Build literature map` | LA-1 실행 → knowledge/analysis/01_lit_map.md |
+| `Find research gaps` | LA-2 실행 → knowledge/analysis/02_research_gaps.md |
+| `Create evidence matrix` | LA-8 실행 → knowledge/analysis/08_evidence_matrix.md |
 
 ### Statistical Analysis
 | Command | Action |

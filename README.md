@@ -6,7 +6,7 @@ A structured workflow system for academic medical paper writing using Claude AI.
 
 ## Version
 
-**v0.6.0** (2026-04-18)
+**v0.7.0** (2026-08-23)
 
 ---
 
@@ -23,6 +23,8 @@ This project provides a comprehensive framework for writing academic medical pap
 - **Quality control procedures** with minimum 3-round verification (6 rounds recommended) plus revision QC re-run workflow
 - **Study-type specific checklists** (STROBE, CONSORT, PRISMA, CARE, etc.)
 - **Natural Academic Writing Style system** with Style Reference Tables (Voice/Tense, Transition Words, Verb Upgrades, Common Corrections, Statistical Notation, Hedging Language) and Writing Principles (Clarity/Conciseness/Objectivity/Consistency)
+- **Literature analysis system (Phase 1.5)** with 10 evidence-bound synthesis recipes (literature map, research gaps, academic debates, evidence synthesis, methods comparison, contradictions, theory map, evidence matrix, claim audit, research questions)
+- **Cross-surface support** — the same workflow runs in Claude Code, Codex (`AGENTS.md`), workspace/Cowork, and claude.ai chat (portable skill in `skills/`)
 - **PubMed search tool** with built-in Python script (no MCP or external packages required)
 - **Slash commands** for evidence registration (`/search-evidence`, `/import-doi`)
 
@@ -33,7 +35,10 @@ This project provides a comprehensive framework for writing academic medical pap
 ```
 project/
 ├── CLAUDE.md                     # Core rules & configuration
+├── AGENTS.md                     # Entry point for Codex / non-Claude-Code agents
 ├── README.md                     # This file
+├── skills/                       # Portable skill package (chat & workspace)
+│   └── academic-writing-workflow/
 ├── docs/                         # Reference guides
 │   ├── writing_guide.md          # Section-by-section writing guide
 │   ├── expert_roles.md           # Expert team roles & responsibilities
@@ -43,11 +48,13 @@ project/
 │   ├── evidence_guide.md         # Evidence writing guide
 │   ├── revision_guide.md        # Reviewer response guide
 │   ├── figure_guide.md          # Figure generation guide
-│   └── docx_guide.md            # DOCX conversion guide
+│   ├── docx_guide.md            # DOCX conversion guide
+│   └── literature_analysis_guide.md  # Literature analysis recipes (Phase 1.5)
 ├── knowledge/                    # Reference materials
 │   ├── evidence.md               # Reference summary collection
 │   ├── pdf/                      # Original PDF files
-│   └── summaries/                # Detailed full-text paper summaries
+│   ├── summaries/                # Detailed full-text paper summaries
+│   └── analysis/                 # Literature analysis outputs (Phase 1.5)
 ├── data/                         # Statistical analysis
 │   ├── raw_data.csv              # Original dataset
 │   ├── analysis_plan.md          # Analysis plan (required before analysis)
@@ -73,11 +80,12 @@ project/
 
 1. **Setup**: Update `CLAUDE.md` with your research topic, target journal, and study design
 2. **References**: Use `/search-evidence [query]` or `python3 scripts/search_pubmed.py` to search PubMed and register in `knowledge/evidence.md`
-3. **Data Analysis**: Place data in `data/` folder → create `analysis_plan.md` (required) → run statistical analysis
-4. **Draft Plan**: Create `drafts/draft_plan.md` with key message, tone, essential references, and outline (Opus recommended)
-5. **Drafting**: Write sections in recommended order (Methods → Results → Introduction → Discussion) (Sonnet OK if draft plan is solid)
-6. **QC**: Run minimum 3 QC rounds before submission
-7. **Finalize**: Compile manuscript to DOCX (see `docs/docx_guide.md`)
+3. **Literature Analysis**: Structure the corpus with `/lit-analyze map`, `/lit-analyze gaps`, `/lit-analyze matrix` (see `docs/literature_analysis_guide.md`)
+4. **Data Analysis**: Place data in `data/` folder → create `analysis_plan.md` (required) → run statistical analysis
+5. **Draft Plan**: Create `drafts/draft_plan.md` with key message, tone, essential references, and outline (Opus recommended)
+6. **Drafting**: Write sections in recommended order (Methods → Results → Introduction → Discussion) (Sonnet OK if draft plan is solid)
+7. **QC**: Run minimum 3 QC rounds before submission
+8. **Finalize**: Compile manuscript to DOCX (see `docs/docx_guide.md`)
 
 ---
 
@@ -142,6 +150,42 @@ Slash commands for Claude integration:
 - `/search-evidence [query]` - Search, select, and register in evidence.md
 - `/import-doi [doi]` - Import by DOI and register in evidence.md
 
+### Literature Analysis (Phase 1.5)
+
+Ten evidence-bound recipes that turn a registered reference corpus into structured, citable analysis before drafting begins (`docs/literature_analysis_guide.md`):
+
+| ID | Recipe | Output |
+|----|--------|--------|
+| LA-1 | Literature map | Themes, agreements, disagreements |
+| LA-2 | Research gaps | 5 ranked, defensible gaps |
+| LA-3 | Academic debates | Competing positions with evidence on both sides |
+| LA-4 | Evidence synthesis | Theme-organized synthesis, not paper-by-paper |
+| LA-5 | Methods comparison | Design/sample/analysis table across studies |
+| LA-6 | Contradictions | Genuine conflict vs heterogeneity |
+| LA-7 | Theory map | Frameworks used, supported, challenged |
+| LA-8 | Evidence matrix | One structured row per study |
+| LA-9 | Claim audit | Draft claims re-checked against the corpus |
+| LA-10 | Research questions | 10 questions, scored and ranked |
+
+Built-in safeguards:
+
+- **Closed corpus** — no claim from outside the registered references
+- **Scope of absence** — `Not found in corpus` is never written as "no research exists"; it must be upgraded by a logged search
+- **Provenance tags** — `REPORTED` / `SYNTHESIZED` / `INFERRED` on every item
+- **Heterogeneity is not contradiction** — matching population, outcome definition, and design required before calling a conflict genuine
+- **Research-question gate** — generated questions need an expanded search and user confirmation before they become an analysis plan
+
+Slash commands: `/lit-analyze [mode]`, `/lit-audit [section]`, `/lit-questions [topic]`
+
+### Cross-Surface Usage
+
+| Surface | Entry point | Notes |
+|---------|-------------|-------|
+| Claude Code | `CLAUDE.md` (auto-loaded) | Slash commands and hooks active |
+| Codex / other CLI agents | `AGENTS.md` → `CLAUDE.md` | Command mapping table replaces slash commands |
+| Workspace (Cowork) | Clone the project, read `CLAUDE.md` | Run scripts explicitly; hooks do not fire |
+| claude.ai chat | `skills/academic-writing-workflow/` | Upload PDFs as the corpus; prompt blocks are self-contained |
+
 ---
 
 ## Documentation
@@ -158,6 +202,9 @@ Slash commands for Claude integration:
 | [docs/revision_guide.md](docs/revision_guide.md) | Reviewer response guide (response letter, diplomatic language, QC re-run checklist) |
 | [docs/figure_guide.md](docs/figure_guide.md) | Figure generation guide (DPI, palettes, Python templates) |
 | [docs/docx_guide.md](docs/docx_guide.md) | DOCX conversion guide (formatting, table style, naming rules) |
+| [docs/literature_analysis_guide.md](docs/literature_analysis_guide.md) | Literature analysis recipes LA-1 – LA-10 (map, gaps, debates, synthesis, matrix, claim audit) |
+| [AGENTS.md](AGENTS.md) | Entry point for Codex and other non-Claude-Code agents (command mapping, gates) |
+| [skills/academic-writing-workflow/](skills/academic-writing-workflow/) | Portable skill package for claude.ai chat and workspace sessions |
 | [scripts/search_pubmed.py](scripts/search_pubmed.py) | PubMed search script (NCBI E-utilities, no external packages) |
 
 ---
@@ -203,6 +250,21 @@ Full license text: https://creativecommons.org/licenses/by/4.0/legalcode
 ---
 
 ## Changelog
+
+### v0.7.0 (2026-08-23)
+
+**Literature Analysis (Phase 1.5) and cross-surface support**
+
+- Added `docs/literature_analysis_guide.md` — 10 evidence-bound analysis recipes (LA-1 – LA-10): literature map, research gaps, academic debates, evidence synthesis, methods comparison, contradictions, theory map, evidence matrix, claim audit, research questions
+- Added Phase 1.5 to the workflow between reference registration and the draft plan, with `knowledge/analysis/` as the output folder
+- Added CLAUDE.md Critical Rule 10 (Literature Analysis Integrity): closed corpus, source tags, scope-of-absence distinction, provenance tags (`REPORTED`/`SYNTHESIZED`/`INFERRED`), heterogeneity vs contradiction, research-question gate
+- Added slash commands `/lit-analyze`, `/lit-audit`, `/lit-questions`
+- Added `AGENTS.md` as the entry point for Codex and other non-Claude-Code agents, with a slash-command mapping table
+- Added `skills/academic-writing-workflow/` — portable skill package (SKILL.md + `references/research-synthesis-modes.md`) for claude.ai chat and workspace sessions
+- Linked analysis outputs into `draft_plan.md` items and QC Round 2 (claim audit)
+- Added Phase 1.5 to the model-selection table (Opus recommended) and to the phase completion criteria
+- Extended `docs/qc_guide.md` (v0.5.0) with Round 2.9 Claim Audit and its gate
+- Bumped `docs/evidence_guide.md` to v0.2.3 with a pointer to Phase 1.5
 
 ### v0.6.0 (2026-04-18)
 

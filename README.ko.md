@@ -6,7 +6,7 @@ Claude AI를 활용한 의학 학술 논문 작성을 위한 체계적인 워크
 
 ## 버전
 
-**v0.6.0** (2026-04-18)
+**v0.7.0** (2026-08-23)
 
 ---
 
@@ -23,6 +23,8 @@ Claude AI를 활용한 의학 학술 논문 작성을 위한 체계적인 워크
 - **품질 관리 절차** — 최소 3라운드 검증 (6라운드 권장) + Revision QC 재수행 워크플로
 - **연구 유형별 체크리스트** — STROBE, CONSORT, PRISMA, CARE 등
 - **학술 작문 스타일 시스템** — Style Reference Tables (Voice/Tense, Transition, Verb Upgrades, Common Corrections, Statistical Notation, Hedging) + Writing Principles (Clarity/Conciseness/Objectivity/Consistency)
+- **문헌 분석 시스템 (Phase 1.5)** — 근거 기반 10개 분석 레시피 (문헌 지도, 연구 갭, 학술 논쟁, 근거 합성, 방법론 비교, 모순 탐지, 이론 추적, 근거 매트릭스, 주장 감사, 연구 질문 도출)
+- **다중 환경 지원** — Claude Code, Codex(`AGENTS.md`), 워크스페이스/Cowork, claude.ai 챗(`skills/` 포터블 스킬)에서 동일 워크플로우 실행
 - **PubMed 검색 도구** — 내장 Python 스크립트 (MCP 및 외부 패키지 불필요)
 - **슬래시 명령어** — 근거 문헌 등록 (`/search-evidence`, `/import-doi`)
 
@@ -33,7 +35,10 @@ Claude AI를 활용한 의학 학술 논문 작성을 위한 체계적인 워크
 ```
 project/
 ├── CLAUDE.md                     # 핵심 규칙 및 설정
+├── AGENTS.md                     # Codex 등 비-Claude-Code 에이전트 진입점
 ├── README.md                     # 영문 README
+├── skills/                       # 포터블 스킬 패키지 (챗·워크스페이스)
+│   └── academic-writing-workflow/
 ├── docs/                         # 참조 가이드
 │   ├── writing_guide.md          # 섹션별 작성 가이드
 │   ├── expert_roles.md           # 전문가 팀 역할 및 책임
@@ -43,11 +48,13 @@ project/
 │   ├── evidence_guide.md         # 근거 문헌 작성 가이드
 │   ├── revision_guide.md        # 리뷰어 응답 가이드
 │   ├── figure_guide.md          # Figure 생성 가이드
-│   └── docx_guide.md            # DOCX 변환 가이드
+│   ├── docx_guide.md            # DOCX 변환 가이드
+│   └── literature_analysis_guide.md  # 문헌 분석 레시피 (Phase 1.5)
 ├── knowledge/                    # 참고 자료
 │   ├── evidence.md               # 참고문헌 요약 정리 자료집
 │   ├── pdf/                      # 원본 PDF 파일
-│   └── summaries/                # 개별 논문 상세 요약
+│   ├── summaries/                # 개별 논문 상세 요약
+│   └── analysis/                 # 문헌 분석 산출물 (Phase 1.5)
 ├── data/                         # 통계 분석
 │   ├── raw_data.csv              # 원본 데이터셋
 │   ├── analysis_plan.md          # 분석 계획 (분석 전 필수 작성)
@@ -73,11 +80,12 @@ project/
 
 1. **설정**: `CLAUDE.md`에 연구 주제, 목표 저널, 연구 설계를 입력합니다
 2. **참고문헌**: `/search-evidence [검색어]` 또는 `python3 scripts/search_pubmed.py`로 PubMed를 검색하고 `knowledge/evidence.md`에 등록합니다
-3. **데이터 분석**: `data/` 폴더에 데이터를 배치 → `analysis_plan.md` 작성 (필수) → 통계 분석 실행
-4. **원고 계획**: `drafts/draft_plan.md`에 핵심 메시지, 논조, 필수 참고문헌, 개요 작성 (Opus 권장)
-5. **초안 작성**: 권장 순서에 따라 섹션을 작성합니다 (Sonnet 가능, draft plan이 충실하면 OK)
-6. **품질 관리**: 제출 전 최소 3라운드의 QC를 수행합니다 (6라운드 권장)
-7. **최종화**: 원고를 DOCX로 컴파일합니다 (`docs/docx_guide.md` 참조)
+3. **문헌 분석**: `/lit-analyze map`, `/lit-analyze gaps`, `/lit-analyze matrix`로 corpus를 구조화합니다 (`docs/literature_analysis_guide.md` 참조)
+4. **데이터 분석**: `data/` 폴더에 데이터를 배치 → `analysis_plan.md` 작성 (필수) → 통계 분석 실행
+5. **원고 계획**: `drafts/draft_plan.md`에 핵심 메시지, 논조, 필수 참고문헌, 개요 작성 (Opus 권장)
+6. **초안 작성**: 권장 순서에 따라 섹션을 작성합니다 (Sonnet 가능, draft plan이 충실하면 OK)
+7. **품질 관리**: 제출 전 최소 3라운드의 QC를 수행합니다 (6라운드 권장)
+8. **최종화**: 원고를 DOCX로 컴파일합니다 (`docs/docx_guide.md` 참조)
 
 ---
 
@@ -138,6 +146,42 @@ Claude 통합 슬래시 명령어:
 - `/search-evidence [검색어]` - 검색, 선택, evidence.md에 등록
 - `/import-doi [doi]` - DOI로 가져와서 evidence.md에 등록
 
+### 문헌 분석 (Phase 1.5)
+
+등록된 참고문헌을 원고 작성 전에 구조화하는 근거 기반 10개 레시피 (`docs/literature_analysis_guide.md`):
+
+| ID | 레시피 | 산출물 |
+|----|--------|--------|
+| LA-1 | 문헌 지도 | 테마, 합의, 불일치 |
+| LA-2 | 연구 갭 | 방어 가능한 갭 5개 (순위화) |
+| LA-3 | 학술 논쟁 | 경쟁 입장과 양측 근거 |
+| LA-4 | 근거 합성 | 논문별이 아닌 테마별 합성 |
+| LA-5 | 방법론 비교 | 설계·표본·분석 비교표 |
+| LA-6 | 모순 탐지 | 진짜 모순 vs 이질성 |
+| LA-7 | 이론 추적 | 사용된 개념틀과 지지·반박 근거 |
+| LA-8 | 근거 매트릭스 | 논문당 1행 구조화 표 |
+| LA-9 | 주장 감사 | 초안 주장을 corpus에 재대조 |
+| LA-10 | 연구 질문 | 질문 10개 점수화·순위화 |
+
+내장 안전장치:
+
+- **Closed corpus** — 등록된 문헌 밖의 지식으로 claim을 만들지 않음
+- **"없음"의 범위 구분** — `Not found in corpus`를 "연구가 없다"로 쓰지 않음 (실제 검색 기록 후 승격)
+- **출처 유형 태그** — 항목마다 `REPORTED` / `SYNTHESIZED` / `INFERRED`
+- **이질성 ≠ 모순** — population·outcome 정의·설계가 일치해야 진짜 모순
+- **연구 질문 게이트** — 도출된 질문은 확장 검색과 사용자 확인 후에만 analysis plan으로
+
+슬래시 명령어: `/lit-analyze [mode]`, `/lit-audit [section]`, `/lit-questions [topic]`
+
+### 다중 환경 사용
+
+| 환경 | 진입점 | 비고 |
+|------|--------|------|
+| Claude Code | `CLAUDE.md` (자동 로드) | 슬래시 명령어·훅 작동 |
+| Codex 등 CLI 에이전트 | `AGENTS.md` → `CLAUDE.md` | 커맨드 매핑 표로 대체 |
+| 워크스페이스 (Cowork) | 프로젝트 클론 후 `CLAUDE.md` 읽기 | 스크립트 명시적 실행, 훅 미작동 |
+| claude.ai 챗 | `skills/academic-writing-workflow/` | PDF 업로드가 corpus, 프롬프트 블록 자체 완결 |
+
 ---
 
 ## 문서 목록
@@ -154,6 +198,9 @@ Claude 통합 슬래시 명령어:
 | [docs/revision_guide.md](docs/revision_guide.md) | 리뷰어 응답 가이드 (응답서 작성, 외교적 표현, QC 재수행 체크리스트) |
 | [docs/figure_guide.md](docs/figure_guide.md) | Figure 생성 가이드 (DPI, 팔레트, Python 템플릿) |
 | [docs/docx_guide.md](docs/docx_guide.md) | DOCX 변환 가이드 (서식, 테이블 스타일, 네이밍 규칙) |
+| [docs/literature_analysis_guide.md](docs/literature_analysis_guide.md) | 문헌 분석 레시피 LA-1 – LA-10 (지도, 갭, 논쟁, 합성, 매트릭스, 주장 감사) |
+| [AGENTS.md](AGENTS.md) | Codex 등 비-Claude-Code 에이전트용 진입점 (커맨드 매핑, 게이트) |
+| [skills/academic-writing-workflow/](skills/academic-writing-workflow/) | claude.ai 챗·워크스페이스용 포터블 스킬 패키지 |
 | [scripts/search_pubmed.py](scripts/search_pubmed.py) | PubMed 검색 스크립트 (NCBI E-utilities, 외부 패키지 불필요) |
 
 ---

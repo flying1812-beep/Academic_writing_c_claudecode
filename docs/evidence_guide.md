@@ -1,4 +1,4 @@
-# Evidence 작성 가이드 (v0.2.2)
+# Evidence 작성 가이드 (v0.2.3)
 
 > `knowledge/evidence.md` 작성 방법 및 문헌 관리 워크플로우
 
@@ -26,6 +26,8 @@ knowledge/
 | `evidence.md` | 전체 문헌 종합 정리 | 논문당 핵심 요약 + key points |
 
 **흐름:** PDF (원본) → summaries (개별 상세) → evidence (종합 정리)
+
+> evidence.md 등록이 끝나면 **Phase 1.5 (Literature Analysis)** 로 넘어간다. 등록된 문헌을 지도·갭·모순·매트릭스로 구조화하는 절차는 `docs/literature_analysis_guide.md`에 있으며, 산출물은 `knowledge/analysis/`에 저장한다.
 
 ---
 

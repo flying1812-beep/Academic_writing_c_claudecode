@@ -6,7 +6,7 @@ Claude AI を活用した医学学術論文執筆のための体系的なワー�
 
 ## バージョン
 
-**v0.6.0** (2026-04-18)
+**v0.7.0** (2026-08-23)
 
 ---
 
@@ -23,6 +23,8 @@ Claude AI を活用した医学学術論文執筆のための体系的なワー�
 - **品質管理手順** — 最低3ラウンドの検証（6ラウンド推奨）＋ Revision QC 再実行ワークフロー
 - **研究タイプ別チェックリスト** — STROBE、CONSORT、PRISMA、CARE 等
 - **学術執筆スタイルシステム** — Style Reference Tables（Voice/Tense、Transition、Verb Upgrades、Common Corrections、Statistical Notation、Hedging）＋ Writing Principles（Clarity/Conciseness/Objectivity/Consistency）
+- **文献分析システム（Phase 1.5）** — エビデンスに基づく 10 の分析レシピ（文献マップ、リサーチギャップ、学術的論争、エビデンス統合、方法論比較、矛盾検出、理論追跡、エビデンスマトリクス、主張監査、研究設問の導出）
+- **マルチ環境対応** — Claude Code、Codex（`AGENTS.md`）、ワークスペース/Cowork、claude.ai チャット（`skills/` ポータブルスキル）で同一ワークフローを実行
 - **PubMed 検索ツール** — 内蔵 Python スクリプト（MCP・外部パッケージ不要）
 - **スラッシュコマンド** — エビデンス登録（`/search-evidence`、`/import-doi`）
 
@@ -33,7 +35,10 @@ Claude AI を活用した医学学術論文執筆のための体系的なワー�
 ```
 project/
 ├── CLAUDE.md                     # コアルール・設定
+├── AGENTS.md                     # Codex など非 Claude Code エージェントの入口
 ├── README.md                     # 英語版 README
+├── skills/                       # ポータブルスキルパッケージ（チャット・ワークスペース）
+│   └── academic-writing-workflow/
 ├── docs/                         # 参照ガイド
 │   ├── writing_guide.md          # セクション別執筆ガイド
 │   ├── expert_roles.md           # 専門家チームの役割と責任
@@ -43,11 +48,13 @@ project/
 │   ├── evidence_guide.md         # エビデンス作成ガイド
 │   ├── revision_guide.md        # リビジョン・レビュアー対応ガイド
 │   ├── figure_guide.md          # Figure作成ガイド
-│   └── docx_guide.md            # DOCX 変換ガイド
+│   ├── docx_guide.md            # DOCX 変換ガイド
+│   └── literature_analysis_guide.md  # 文献分析レシピ（Phase 1.5）
 ├── knowledge/                    # 参考資料
 │   ├── evidence.md               # 参考文献要約集
 │   ├── pdf/                      # 原本 PDF ファイル
-│   └── summaries/                # 個別論文の詳細要約
+│   ├── summaries/                # 個別論文の詳細要約
+│   └── analysis/                 # 文献分析の成果物（Phase 1.5）
 ├── data/                         # 統計分析
 │   ├── raw_data.csv              # 元データセット
 │   ├── analysis_plan.md          # 分析計画（分析前に必須作成）
@@ -73,11 +80,12 @@ project/
 
 1. **設定**：`CLAUDE.md` に研究テーマ、対象ジャーナル、研究デザインを入力します
 2. **参考文献**：`/search-evidence [クエリ]` または `python3 scripts/search_pubmed.py` で PubMed を検索し、`knowledge/evidence.md` に登録します
-3. **データ分析**：`data/` フォルダにデータを配置 → `analysis_plan.md` 作成（必須）→ 統計分析実行
-4. **原稿計画**：`drafts/draft_plan.md` にキーメッセージ、トーン、必須参考文献、アウトラインを作成（Opus 推奨）
-5. **執筆**：推奨順序に従ってセクションを作成（Draft Plan が充実していれば Sonnet でも可）
-6. **品質管理**：投稿前に最低3ラウンドの QC を実施します（6ラウンド推奨）
-7. **最終化**：原稿を DOCX にコンパイルします（`docs/docx_guide.md` 参照）
+3. **文献分析**：`/lit-analyze map`、`/lit-analyze gaps`、`/lit-analyze matrix` でコーパスを構造化します（`docs/literature_analysis_guide.md` 参照）
+4. **データ分析**：`data/` フォルダにデータを配置 → `analysis_plan.md` 作成（必須）→ 統計分析実行
+5. **原稿計画**：`drafts/draft_plan.md` にキーメッセージ、トーン、必須参考文献、アウトラインを作成（Opus 推奨）
+6. **執筆**：推奨順序に従ってセクションを作成（Draft Plan が充実していれば Sonnet でも可）
+7. **品質管理**：投稿前に最低3ラウンドの QC を実施します（6ラウンド推奨）
+8. **最終化**：原稿を DOCX にコンパイルします（`docs/docx_guide.md` 参照）
 
 ---
 
@@ -138,6 +146,42 @@ Claude 統合スラッシュコマンド：
 - `/search-evidence [クエリ]` - 検索、選択、evidence.md に登録
 - `/import-doi [doi]` - DOI から取得し evidence.md に登録
 
+### 文献分析（Phase 1.5）
+
+登録済み参考文献を執筆前に構造化する、エビデンスに基づく 10 のレシピ（`docs/literature_analysis_guide.md`）:
+
+| ID | レシピ | 成果物 |
+|----|--------|--------|
+| LA-1 | 文献マップ | テーマ、合意、不一致 |
+| LA-2 | リサーチギャップ | 擁護可能なギャップ5件（順位付き） |
+| LA-3 | 学術的論争 | 対立する立場と双方の根拠 |
+| LA-4 | エビデンス統合 | 論文単位ではなくテーマ単位の統合 |
+| LA-5 | 方法論比較 | デザイン・標本・分析の比較表 |
+| LA-6 | 矛盾検出 | 真の矛盾か異質性か |
+| LA-7 | 理論マップ | 用いられた枠組みと支持・反証 |
+| LA-8 | エビデンスマトリクス | 論文ごとに1行の構造化表 |
+| LA-9 | 主張監査 | 草稿の主張をコーパスと再照合 |
+| LA-10 | 研究設問 | 10 件をスコア化・順位付け |
+
+組み込みの安全装置:
+
+- **クローズドコーパス** — 登録文献の外にある知識で主張を作らない
+- **「無い」の範囲区別** — `Not found in corpus` を「研究が存在しない」と書かない（実検索の記録後に昇格）
+- **出所タグ** — 各項目に `REPORTED` / `SYNTHESIZED` / `INFERRED`
+- **異質性 ≠ 矛盾** — 集団・アウトカム定義・デザインの一致が前提
+- **研究設問ゲート** — 生成された設問は拡張検索とユーザー確認を経てから分析計画へ
+
+スラッシュコマンド: `/lit-analyze [mode]`, `/lit-audit [section]`, `/lit-questions [topic]`
+
+### マルチ環境での利用
+
+| 環境 | 入口 | 備考 |
+|------|------|------|
+| Claude Code | `CLAUDE.md`（自動読込） | スラッシュコマンド・フック有効 |
+| Codex など CLI エージェント | `AGENTS.md` → `CLAUDE.md` | コマンド対応表で代替 |
+| ワークスペース（Cowork） | プロジェクトを clone し `CLAUDE.md` を読む | スクリプトを明示実行、フックは動作しない |
+| claude.ai チャット | `skills/academic-writing-workflow/` | アップロードした PDF がコーパス、プロンプトは自己完結 |
+
 ---
 
 ## ドキュメント一覧
@@ -154,6 +198,9 @@ Claude 統合スラッシュコマンド：
 | [docs/revision_guide.md](docs/revision_guide.md) | レビュアー対応ガイド（回答書作成、外交的表現、QC 再実行チェックリスト） |
 | [docs/figure_guide.md](docs/figure_guide.md) | Figure作成ガイド（DPI、パレット、Pythonテンプレート） |
 | [docs/docx_guide.md](docs/docx_guide.md) | DOCX 変換ガイド（書式、テーブルスタイル、命名規則） |
+| [docs/literature_analysis_guide.md](docs/literature_analysis_guide.md) | 文献分析レシピ LA-1 – LA-10（マップ、ギャップ、論争、統合、マトリクス、主張監査） |
+| [AGENTS.md](AGENTS.md) | Codex など非 Claude Code エージェント向けの入口（コマンド対応表、ゲート） |
+| [skills/academic-writing-workflow/](skills/academic-writing-workflow/) | claude.ai チャット・ワークスペース用ポータブルスキルパッケージ |
 | [scripts/search_pubmed.py](scripts/search_pubmed.py) | PubMed 検索スクリプト（NCBI E-utilities、外部パッケージ不要） |
 
 ---

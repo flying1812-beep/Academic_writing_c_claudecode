@@ -6,7 +6,7 @@
 
 ## 版本
 
-**v0.6.0** (2026-04-18)
+**v0.7.0** (2026-08-23)
 
 ---
 
@@ -23,6 +23,8 @@
 - **质量控制流程** — 至少3轮验证（推荐6轮）+ Revision QC 重跑工作流
 - **研究类型专用清单** — STROBE、CONSORT、PRISMA、CARE 等
 - **学术写作风格系统** — Style Reference Tables（Voice/Tense、Transition、Verb Upgrades、Common Corrections、Statistical Notation、Hedging）+ Writing Principles（Clarity/Conciseness/Objectivity/Consistency）
+- **文献分析系统（Phase 1.5）** — 基于证据的 10 个分析配方（文献地图、研究空白、学术争论、证据综合、方法学比较、矛盾检测、理论追踪、证据矩阵、主张审计、研究问题生成）
+- **多环境支持** — 在 Claude Code、Codex（`AGENTS.md`）、工作区/Cowork 与 claude.ai 聊天（`skills/` 便携技能）中运行同一工作流
 - **PubMed 搜索工具** — 内置 Python 脚本（无需 MCP 或外部包）
 - **斜杠命令** — 证据文献注册（`/search-evidence`、`/import-doi`）
 
@@ -33,7 +35,10 @@
 ```text
 project/
 ├── CLAUDE.md                     # 核心规则与配置
+├── AGENTS.md                     # Codex 等非 Claude Code 智能体入口
 ├── README.md                     # 英文 README
+├── skills/                       # 便携技能包（聊天与工作区）
+│   └── academic-writing-workflow/
 ├── docs/                         # 参考指南
 │   ├── writing_guide.md          # 分节写作指南
 │   ├── expert_roles.md           # 专家团队角色与职责
@@ -43,11 +48,13 @@ project/
 │   ├── evidence_guide.md         # 证据文献编写指南
 │   ├── revision_guide.md        # 审稿人回复指南
 │   ├── figure_guide.md          # 图表生成指南
-│   └── docx_guide.md            # DOCX 转换指南
+│   ├── docx_guide.md            # DOCX 转换指南
+│   └── literature_analysis_guide.md  # 文献分析配方（Phase 1.5）
 ├── knowledge/                    # 参考资料
 │   ├── evidence.md               # 参考文献摘要汇编
 │   ├── pdf/                      # 原始 PDF 文件
-│   └── summaries/                # 单篇论文详细摘要
+│   ├── summaries/                # 单篇论文详细摘要
+│   └── analysis/                 # 文献分析产出（Phase 1.5）
 ├── data/                         # 统计分析
 │   ├── raw_data.csv              # 原始数据集
 │   ├── analysis_plan.md          # 分析计划（分析前必须创建）
@@ -73,11 +80,12 @@ project/
 
 1. **设置**：在 `CLAUDE.md` 中填写研究主题、目标期刊和研究设计
 2. **参考文献**：使用 `/search-evidence [关键词]` 或 `python3 scripts/search_pubmed.py` 搜索 PubMed 并注册到 `knowledge/evidence.md`
-3. **数据分析**：将数据放入 `data/` 文件夹 → 创建 `analysis_plan.md`（必须）→ 运行统计分析
-4. **稿件计划**：在 `drafts/draft_plan.md` 中撰写核心信息、论调、必要参考文献和大纲（推荐 Opus）
-5. **撰写初稿**：按推荐顺序撰写各章节（Draft Plan 充实的情况下 Sonnet 也可）
-6. **质量控制**：提交前至少进行3轮 QC 检查（推荐6轮）
-7. **最终定稿**：将稿件编译为 DOCX（参见 `docs/docx_guide.md`）
+3. **文献分析**：使用 `/lit-analyze map`、`/lit-analyze gaps`、`/lit-analyze matrix` 结构化语料库（参见 `docs/literature_analysis_guide.md`）
+4. **数据分析**：将数据放入 `data/` 文件夹 → 创建 `analysis_plan.md`（必须）→ 运行统计分析
+5. **稿件计划**：在 `drafts/draft_plan.md` 中撰写核心信息、论调、必要参考文献和大纲（推荐 Opus）
+6. **撰写初稿**：按推荐顺序撰写各章节（Draft Plan 充实的情况下 Sonnet 也可）
+7. **质量控制**：提交前至少进行3轮 QC 检查（推荐6轮）
+8. **最终定稿**：将稿件编译为 DOCX（参见 `docs/docx_guide.md`）
 
 ---
 
@@ -142,6 +150,42 @@ Claude 集成斜杠命令：
 - `/search-evidence [关键词]` - 搜索、选择并注册到 evidence.md
 - `/import-doi [doi]` - 通过 DOI 获取并注册到 evidence.md
 
+### 文献分析（Phase 1.5）
+
+在撰写前把已注册的参考文献结构化的 10 个循证配方（`docs/literature_analysis_guide.md`）：
+
+| ID | 配方 | 产出 |
+|----|------|------|
+| LA-1 | 文献地图 | 主题、共识、分歧 |
+| LA-2 | 研究空白 | 5 个可辩护的空白（已排序） |
+| LA-3 | 学术争论 | 对立立场与双方证据 |
+| LA-4 | 证据综合 | 按主题而非逐篇综合 |
+| LA-5 | 方法学比较 | 设计·样本·分析对照表 |
+| LA-6 | 矛盾检测 | 真矛盾还是异质性 |
+| LA-7 | 理论地图 | 所用框架及支持·反驳证据 |
+| LA-8 | 证据矩阵 | 每篇论文一行的结构化表 |
+| LA-9 | 主张审计 | 将初稿主张与语料库重新核对 |
+| LA-10 | 研究问题 | 10 个问题评分并排序 |
+
+内置保障：
+
+- **封闭语料库** — 不使用已注册文献之外的知识提出主张
+- **区分"没有"的范围** — 不把 `Not found in corpus` 写成"不存在研究"（须经实际检索记录后升级）
+- **来源标签** — 每一项标注 `REPORTED` / `SYNTHESIZED` / `INFERRED`
+- **异质性 ≠ 矛盾** — 需人群、结局定义与设计一致才算真矛盾
+- **研究问题关卡** — 生成的问题须经扩展检索与用户确认后才进入分析计划
+
+斜杠命令：`/lit-analyze [mode]`、`/lit-audit [section]`、`/lit-questions [topic]`
+
+### 多环境使用
+
+| 环境 | 入口 | 说明 |
+|------|------|------|
+| Claude Code | `CLAUDE.md`（自动加载） | 斜杠命令与钩子生效 |
+| Codex 等 CLI 智能体 | `AGENTS.md` → `CLAUDE.md` | 以命令映射表替代 |
+| 工作区（Cowork） | 克隆项目并阅读 `CLAUDE.md` | 显式运行脚本，钩子不生效 |
+| claude.ai 聊天 | `skills/academic-writing-workflow/` | 上传的 PDF 即语料库，提示块自包含 |
+
 ---
 
 ## 文档列表
@@ -158,6 +202,9 @@ Claude 集成斜杠命令：
 | [docs/revision_guide.md](docs/revision_guide.md) | 审稿人回复指南（回复信撰写、外交措辞、QC 重跑清单） |
 | [docs/figure_guide.md](docs/figure_guide.md) | 图表生成指南（DPI、调色板、Python模板） |
 | [docs/docx_guide.md](docs/docx_guide.md) | DOCX 转换指南（格式、表格样式、命名规则） |
+| [docs/literature_analysis_guide.md](docs/literature_analysis_guide.md) | 文献分析配方 LA-1 – LA-10（地图、空白、争论、综合、矩阵、主张审计） |
+| [AGENTS.md](AGENTS.md) | Codex 等非 Claude Code 智能体的入口（命令映射、关卡） |
+| [skills/academic-writing-workflow/](skills/academic-writing-workflow/) | 面向 claude.ai 聊天与工作区的便携技能包 |
 | [scripts/search_pubmed.py](scripts/search_pubmed.py) | PubMed 搜索脚本（NCBI E-utilities，无需外部包） |
 
 ---
